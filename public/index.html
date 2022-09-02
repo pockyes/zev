@@ -24,8 +24,12 @@
       <div class="option">
           <div>
               <form onsubmit="searchPlaces(); return false;">
-                  키워드 : <input type="text" value="이태원 맛집" id="keyword" size="15"> 
-                  <button type="submit">검색</button> 
+                  키워드 : <input 
+                  type="text" 
+                  value={search} 
+                  id="keyword"
+                  onchange={onchangeSearch}> 
+                  <button id="submit_btn" type="submit">검색</button> 
               </form>
           </div>
       </div>
