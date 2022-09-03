@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 // import * as S from "./WriteMap.styled";
 
-declare const window: typeof globalThis & {
+declare const window: typeof globalThis & { 
   kakao: any;
 };
+
 
 export default function WriteMapPage(props: any) {
   useEffect(() => {
@@ -19,7 +20,7 @@ export default function WriteMapPage(props: any) {
         const container = document.getElementById("map");
         const options = {
           center: new window.kakao.maps.LatLng(38.2313466, 128.2139293),
-          level: 1,
+          level: 5,
         };
         const map = new window.kakao.maps.Map(container, options);
 
@@ -67,6 +68,7 @@ export default function WriteMapPage(props: any) {
             for (let i = 0; i < data.length; i++) {
               displayMarker(data[i]);
               bounds.extend(new window.kakao.maps.LatLng(data[i].y, data[i].x));
+              // console.log('data >>> ', data[i].y, data[i].x);
             }
 
             map.setBounds(bounds);
@@ -101,11 +103,12 @@ export default function WriteMapPage(props: any) {
           );
         }
 
+
         function displayPlaces(places: any) {
           let listEl = document.getElementById("placesList"),
           menuEl: any = document.getElementById("menu_wrap"),
           fragment = document.createDocumentFragment();
-          // const bounds = new window.kakao.maps.LatLngBounds();
+          const bounds = new window.kakao.maps.LatLngBounds();
           removeAllChildNods(listEl);
           removeMarker();
           for (let i = 0; i < places.length; i++) {
@@ -146,37 +149,37 @@ export default function WriteMapPage(props: any) {
           listEl?.appendChild(fragment);
           menuEl.scrollTop = 0;
 
-          // map.panTo(bounds);
+          map.panTo(bounds);
         }
 
         function getListItem(index: any, places: any) {
           const el = document.createElement("li");
 
-          let itemStr =
-            '<span class="markerbg marker_' +
-            (index + 1) +
-            '"></span>' +
-            '<div class="info">' +
-            "   <h5>" +
-            places.place_name +
-            "</h5>";
-
-          if (places.road_address_name) {
-            itemStr +=
-              "    <span>" +
-              places.road_address_name +
-              "</span>" +
-              '   <span class="jibun gray">' +
-              `<img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/places_jibun.png">
-              </img>` +
-              places.address_name +
-              "</span>";
-          } else {
-            itemStr += "    <span>" + places.address_name + "</span>";
-          }
-
-          itemStr +=
-            '  <span class="tel">' + places.phone + "</span>" + "</div>";
+          let itemStr =`
+          <div class="info">
+            <span class="marker marker_${index+1}">
+              ${index+1}
+            </span>
+            <a href="${places.place_url}">
+              <h5 class="info-item place-name">${places.place_name}</h5>
+              ${
+                places.road_address_name 
+                ? `<span class="info-item road-address-name">
+                    ${places.road_address_name}
+                   </span>
+                   <span class="info-item address-name">
+                 	 ${places.address_name}
+               	   </span>`
+                : `<span class="info-item address-name">
+             	     ${places.address_name}
+                  </span>`
+              }
+              <span class="info-item tel">
+                ${places.phone}
+              </span>
+            </a>
+          </div>
+          `
 
           el.innerHTML = itemStr;
           el.className = "item";
@@ -184,7 +187,8 @@ export default function WriteMapPage(props: any) {
           return el;
         }
 
-        function addMarker(position: any, idx: any) {
+        // 마커를 생성하고 지도 위에 마커를 표시하는 함수
+        function addMarker(position: any, idx: number) {
           const imageSrc =
             "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png";
           const imageSize = new window.kakao.maps.Size(36, 37);
@@ -194,14 +198,10 @@ export default function WriteMapPage(props: any) {
             offset: new window.kakao.maps.Point(13, 37),
           };
 
-          const markerImage = new window.kakao.maps.MarkerImage(
-            imageSrc,
-            imageSize,
-            imgOptions
-          );
+          const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions);
 
           const marker = new window.kakao.maps.Marker({
-            position,
+            position: position,
             image: markerImage,
           });
 
@@ -245,7 +245,7 @@ export default function WriteMapPage(props: any) {
           paginationEl?.appendChild(fragment);
         }
 
-        function displayInfowindow(marker: any, title: any) {
+        function displayInfowindow(marker: any, title: string) {
           const content =
             '<div style="padding:5px;z-index:1;">' + title + "</div>";
 
